@@ -1,0 +1,72 @@
+
+from collections import defaultdict
+import copy
+
+def main():
+    stacks, instructions = parse_file()
+    
+    new_stacks_puzzle_1 = simulate_instructions_puzzle_1(copy.deepcopy(stacks), instructions)
+    print(f"Crates on top in puzzle 1: {get_top_str(new_stacks_puzzle_1)}")
+    
+    new_stacks_puzzle_2 = simulate_instructions_puzzle_2(copy.deepcopy(stacks), instructions)
+    print(f"Crates on top in puzzle 2: {get_top_str(new_stacks_puzzle_2)}")
+
+def simulate_instructions_puzzle_2(stacks: dict[int, list[str]], instructions: list[list]) :
+    for index, instruction in enumerate(instructions):
+       
+        number_to_move : int = instruction[0]
+        from_stack_number : int = instruction[1]
+        to_stack_number : int = instruction[2]
+        
+        to_stack: list = stacks[to_stack_number]
+        from_stack: list = stacks[from_stack_number]
+        tmp = from_stack[-number_to_move:]
+        to_stack.extend(tmp)
+        stacks[from_stack_number] = from_stack[:-number_to_move]
+
+    return stacks
+
+def simulate_instructions_puzzle_1(stacks: dict[int, list[str]], instructions: list[list]) :
+    for index, instruction in enumerate(instructions):
+        number_to_move : int = instruction[0]
+        from_stack_number : int = instruction[1]
+        to_stack_number : int = instruction[2]
+        to_stack: list = stacks[to_stack_number]
+        from_stack: list = stacks[from_stack_number]
+        for i in range(number_to_move):
+            #print(f"{from_stack}, {to_stack}")
+            to_stack.append(from_stack.pop())
+            #print(f"{from_stack}, {to_stack}")
+    return stacks
+
+def get_top_str(stacks: dict[int, list[str]]) -> str:
+    top_str = ""
+    keys_to_iterate = list(stacks.keys())
+    for index in keys_to_iterate:
+        if (stacks[index]):
+            top_str += (stacks[index][-1])
+            print(f"{stacks[index]}")
+    return top_str
+
+def parse_file() -> (dict[int, list[str]], list[list]):
+    stacks: dict[int, list[str]] = defaultdict(list)
+    instructions: list[list] = []
+    file_path = 'advent-day5-2022/2022-puzzle5-input.txt'
+    with open(file_path, 'r', encoding="utf-8") as file:
+        
+        stacks_str, instructions_str = file.read().split("\n\n")
+        stacks_list = list(reversed(stacks_str.split("\n")))
+
+        for stack in stacks_list[1::]:
+            for i, box in enumerate(stack[1::4]):
+                if box != " ":
+                    stacks[i+1].append(box)
+
+        for index, value in enumerate(instructions_str.split("\n")):
+            if value:
+                discard1, number_to_move, dicard2, from_stack, discard2, to_stack = value.split()
+                instructions.append(list(map(int, (number_to_move, from_stack, to_stack))))
+    return stacks, instructions
+
+if __name__ == "__main__":
+    main()
